@@ -1,0 +1,1725 @@
+# Day 1
+## Junit单元测试
+
+测试分类：
+
+  1. 黑盒测试
+
+  2. 白盒测试：Junit是白盒测试
+
+IDEA使用技巧：/** 回车 可以快速生成默认注释
+
+### 使用步骤：
+
+1. 定义一个测试类（测试用例）
+	建议：
+		测试类名：被测试的类名Test
+		包名：xxx.xxxx.xx.test
+
+2. 定义测试方法：可以独立运行
+	建议：
+		方法名：test测试的方法名
+		返回值：void
+		参数列表：空参
+	
+3. 给方法加注解@Test
+
+4. 导入依赖环境alt+enter
+
+就可以直接运行该方法了
+
+### 判定结果：
+不看输出，看红色（失败）还是绿色（正确）。后期有测试框架
+
+### 断言
+
+```
+Assert.assertEquals();
+```
+
+### 两个注解
+
+#### @Before
+用于资源申请之类的，所有测试方法在执行之前都会先执行该方法
+
+#### @After
+所有测试方法最后都会执行该方法。即使有异常也会执行。
+
+## 反射：框架设计的灵魂
+
+框架：半成品的软件。
+
+反射：将类的各个组成部分封装为其他对象，这就是反射机制。【字节码文件会被类加载器加载到内存中，封装成Class类的对象，成员变量封装成Field对象，构造方法ConStructor，成员方法Method。由Class类对象再去new自定义类的对象】
+
+
+好处：
+
+1. 可以在程序运行的过程中，操作这些对象。
+2. 可以解耦，提高程序的可扩展性。
+
+### 获取Class对象的方式：
+1. ```Class.forName("全类名")```：将字节码文件加载进内存，返回Class对象
+	多用于配置文件，将类名定义在配置文件中。读取文件，加载类。
+2. ```类名.class```：通过类名的属性class获取
+	多用于参数的传递
+3. ```对象.getClass()```：Object类中的方法
+	用对象获取字节码
+
+
+注意！：同一个字节码文件在一次程序运行过程中，只会被加载一次，不论通过哪一种方式获取的Class对象都是同一个。
+
+
+### 获取功能
+#### 1. 获取成员变量们
+```
+Field[] getFields();获取public的成员变量
+Field[] getField(String name);指定public成员变量的名称
+Field[] getDeclaredFields();获取所有的成员变量，不考虑修饰符
+Field[] getDeclaredField(String name);
+```
+#### 2. 获取构造方法们
+
+```
+Constructor<?>[] getConstructors();
+Constructor<?>[] getConstructor(Class<?>... parameterTypes);区分构造方法是靠传入的参数，这里的参数就是传入参数的class对象，如：String.class,int.class
+Constructor<?>[] getDeclaredConstructors();
+Constructor<?>[] getDeclaredConstructor(Class<?>... parameterTypes);
+```
+#### 3. 获取成员方法们
+
+```
+Method[] getMethods();
+Method[] getMethod(String name, Class<?>... parameterTypes);
+Method[] getDeclaredMethods();
+Method[] getDeclaredMethod(String name, Class<?>... parameterTypes);
+```
+#### 4. 获取类名
+```
+String getName();
+```
+
+IDEA使用技巧：iter出现的就是for-each
+### 操作
+#### Field：成员变量
+操作：
+1. 设置值
+```
+void set(Object obj, Object value);
+```
+2. 获取值
+```
+Object get(Object obj);要传个Object类的对象
+```
+
+访问非public的成员变量时，要忽略访问权限修饰符的安全检查：
+```
+d.setAccessible(true);//d就是private的变量名。暴力反射
+```
+
+#### Constructor:构造方法
+```
+T newInstance(Object... initargs);//创建对象
+
+如果使用空参数的构造方法创建对象，可以使用Class里的方法
+T personClass.newInstance();//1.9后过时了
+```
+
+#### Method:方法对象
+```
+执行方法
+Object invoke(Object obj, Object... args);//传一个Object对象和参数列表，
+获取方法名
+String getName();
+```
+#### 例子中的一些东西：
+
+新建一个配置文件，后缀名properties
+
+```java
+1. 加载配置文件
+Properties pro = new Properties();
+ClassLoader cl = ReflectTest.class.getClassLoader();//当前类的.class下的方法，getClassLoader()，获取类加载器
+InputStream is = classLoader.getResourceAsStream("pro.properties");//资源对应的字节流
+pro.load(is);
+2. 获取配置文件中的内容
+String a = pro.getProperty("keyName");
+```
+
+## 注解
+作用：编写文档，编译检查，代码分析
+
+```
+@Override
+@Deprecated该注解标注的内容，表示已过时
+@SuppressWarnings压制警告，需要传参，一般“all”
+```
+
+### 自定义注解
+
+#### 格式：
+```
+元注解
+public @interface 注解名称{
+属性列表;
+}
+```
+
+反编译：javap
+
+注解本质上就是一个接口，该接口默认继承java.lang.annotation.Annotation接口
+
+##### 属性：接口中的抽象方法
+要求：
+1. 属性的返回值类型 基本数据类型，String，枚举，注解，以上类型的数组
+
+2. 定义了属性，在使用时需要给属性赋值
+
+@MyAnno(age = 1,name="a")
+
+String name() default "b";
+
+如果只有一个属性需要赋值，并且属性的名称是value，则value可以省略
+
+per = Person.P1
+anno2 = @MyAnno2
+strs = {"",""}只有1个时大括号可以省略
+
+
+##### 元注解：
+用于描述注解的注解
+```
+@Target：描述注解能够作用的位置。ElementType枚举类TYPE作用于类METHOD作用于方法，FIELD作用于成员变量上
+@Retention：描述注解能被保留的阶段。RetentionPolicy  CLASS RUNTIME SOURSE，一般都用RUNTIME
+@Documented：注解是否被抽取到api文档中javadoc
+@Inherited：描述注解是否被子类继承
+```
+### 在程序中使用（解析）注解
+
+1. 获取类的字节码文件对象
+```
+Class<ReflectTest> rc = ReflectTest.class
+```
+2. 获取注解
+```
+Pro an = reflectTestClass.getAnnotation(Pro.class);
+其实就是在内存中生成了一个该注解接口的子类实现对象
+```
+3. 调用注解对象的方法
+```
+String className = an.className();
+```
+4. a
+```
+获取注解定义的位置的对象Class.Method,Field
+getAnnotation(Class)
+```
+### 案例
+```
+1. 创建计算器对象
+2. 获取字节码文件对象 .getClass
+3. 获取所有方法getMethods
+4. 判断方法上是否有注解 method.isAnnotationPresent(Check.class)
+异常名称
+e.getCause().getClass().getSimpleName()
+getCause返回的是一个throwable
+e.getCause().getMessage()
+```
+
+### 小结
+1. 大多数时候，使用注解，而不是自定义注解
+2. 注解给编译器用，给解析程序用
+3. 注解不是程序的一部分，可以理解为一个标签
+
+
+# Day2
+1. 数据库的基本概念
+2. MySQL数据库软件
+3. SQL
+
+## 数据库的基本概念
+DataBase（DB）
+
+数据库的特点：
+1. 持久化存储数据的。其实数据库就是一个文件系统
+2. 方便存储和管理数据
+3. 使用统一方式操作数据库——SQL
+
+## MySQL数据库软件
+### 1. 安装
+6.x开始收费
+
+配置的时候如果有哪一个不是勾，就得删了重装
+
+控制台：mysql -uroot -p[password]
+查看是否安装成功
+
+### 2. 卸载
+1. 找到MySQL的安装路径
+2. 找到my.ini文件，从里面找到datadir
+3. 控制面板卸载MySQL
+4. 删掉datadir那个路径最高的MySQL文件夹
+
+### 3. 配置
+计算机——右键——管理——服务和应用程序——可以查看服务
+cmd——> services.msc也可以打开服务
+
+（管理员cmd）
+net start mysql 开启服务
+net stop mysql 关闭服务
+
+#### 登录
+cmd：
+```
+mysql -uroot -p[password]
+
+mysql -h[ip] -uroot -p[password]
+
+mysql --host=[ip] --user=root --password=[password]
+
+```
+
+#### 退出
+cmd：
+```
+exit
+
+quit
+```
+
+#### MySQL目录结构
+my.ini 配置文件
+#### 数据目录
+每个文件夹：一个数据库
+.frm文件：表
+数据记录
+
+## SQL
+Structured Query Language：结构化查询语言
+
+所有关系型数据库都可以用SQL操作，而每种数据库方式里不一样的地方称为“方言”。
+
+### SQL通用语法
+1. 可以单行或多行书写，分号结尾。
+2. 不区分大小写，但是关键字建议大写
+3. 注释有3中：
+	单行注释：
+		```-- 注释```【这个必须有空格】
+		```# 注释```【这个可以没有空格】
+	多行注释：
+		```/* 注释 */```
+
+### SQL语句的分类
+1. DDL（Data Definition Language），数据定义语言
+	操作数据库、表
+2. DML（Manipulation）操作
+	增删改表中的数据
+3. DQL（Query）查询
+	查询表中的数据
+4. DCL（Control）控制
+	授权
+
+#### DDL：操作数据库、表
+1. 操作数据库：CRUD
+	1. C：Create，创建
+		创建数据库：
+			```create database 数据库名称;```
+		判断不存在再创建：
+			```create database if not exists 数据库名称;```
+		指定字符集：
+			```create database 数据库名称 character set 字符集名;```
+	2. R：Retrieve，查询
+		查询所有数据库的名称：
+			```show databases;```
+		查看某个数据库的字符集（编码），本意是查询某个数据库的创建语句
+			```show create database 数据库名;```
+	3. U：Update，修改
+		修改数据库的字符集
+			```alter database 数据库名称 character set 字符集名; //utf8，没有中间的横杠```
+	4. D：Delete，删除
+		删除数据库
+			```drop database 数据库名称;```
+		判断存在再删除
+			```drop databse if exists 数据库名称;```
+	5. 使用数据库
+		查询当前正在使用的数据库名称
+			```select database();```
+		使用数据库
+			```use 数据库名称;```
+2. 操作表
+	1. C：Create，创建
+		语法：
+			```
+			create table 表名(
+				列名1 数据类型1,
+				列名2 数据类型2,
+				...
+				列名n 数据类型n,
+			);
+			```
+			注意：最后一列不要加逗号
+
+		复制：
+			```create table 新表 like 源表;```
+
+		数据库数据类型：
+			1. int：整数
+				```age int```
+			2. double：小数类型
+				```score double(5,2)```前一个参数是总位数，后一个是小数点后的位数
+			3. date：日期，只包含年月日，yyyy-MM-dd
+			4. datetime：日期，包含年月日时分秒，yyyy-MM-dd HH:mm:ss
+			5. timestamp：时间戳类型，包含年月日时分秒，yyyy-MM-dd HH:mm:ss
+				如果不给这个字段赋值，或赋值为null，则默认使用当前的系统时间来自动赋值
+			6. varchar：字符串
+				```name varchar(20)```参数是可以包含的最大字符数
+	2. R：Retrieve，查询
+		查询某个数据库中所有的表名称：
+			```show tables;```
+		查询表结构
+			```desc 表名;```
+	3. U：Update，修改
+		1. 修改表名
+			```alter table 表名 rename to 新的表名;```
+			
+		2. 修改表的字符集
+			```alter table 表名 character set utf8```
+			
+		3. 添加一列
+			```alter table 表名 add 列名 数据类型;```
+		
+		4. 修改列名称、类型
+			```alter table 表名 change 原列名 新列名 新类型;```修改列名和类型
+			```alter table 表名 modify 列名 新类型;```只修改类型
+			
+		5. 删除列
+			```alter table 表名 drop 列名;```
+
+	4. D：Delete，删除
+		```drop table 表名;```
+		```drop table if exists 表名;```
+
+#### 客户端图形化工具：SQLYog
+12.0.9-0
+破解码：
+姓名：cr173
+序列号：
+8d8120df-a5c3-4989-8f47-5afc79c56e7c
+59adfdfe-bcb0-4762-8267-d7fccf16beda
+ec38d297-0543-4679-b098-4baadf91f983
+
+IDEA也可以
+
+#### DML：增删改表中数据
+1. 添加数据
+	语法
+		```insert into 表名(列名1,列名2,...,列名n) values(值1,值2,...值n);```
+	注意：
+		1. 列名和值要一一对应
+		2. 如果表名后没有指定列名，则默认给所有列添加值
+		3. 除了数字类型和NULL，其他类型需要使用引号（单双均可）引起来
+2. 删除数据
+	语法：
+		```delete from 表名 where 条件;```
+	注意：
+		如果不加where，会删除表中所有的记录。
+		但是该操作会重复执行很多次（一条记录一次），如果希望清空表，用
+		```truncate table 表名;```
+
+3. 修改数据
+	语法：
+		```update 表名 set 列名1 = 值1, 列名2 = 值2, ... [where 条件];```
+	注意：如果不加条件，会修改所有值。
+
+#### DQL：查询表中的记录
+	select * from 表名;
+1. 语法：
+
+```
+    select
+        字段列表
+    from
+        表名列表
+    where
+        条件列表
+    group by
+        分组列表
+    having
+        分组之后的条件
+    order by
+        排序
+    limit
+        分页限定
+```
+2. 基础查询
+	1. 多个字段的查询
+		```select 字段名1, 字段名2, ... from 表名;```
+		注意：如果查询所有字段，则可以用```*```来替代字段列表
+	2. 去除重复
+		```distinct```关键字
+
+	3. 计算列
+		一般可以使用四则运算计算一些列的值
+		如果有null参与，结果都为null
+		```ifnull(表达式1,表达式2);```
+
+		表达式1为可能会出现null的字段，判断是否有null的字段名
+		如果字段为null，会替换为表达式2的值
+
+	4. 起别名
+		```as```关键字，as也可以省略，用空格
+
+3. 条件查询
+	1. where子句后跟条件
+	2. 运算符
+		```> < <= >= = <>```不等于有2种```<>```或<!=>，等于只有一个等号
+		```BETWEEN ... AND```
+		```IN(集合)```
+		```LIKE```模糊查询
+			占位符：
+			```_```：单个任意字符
+			```%```：多个任意字符
+		```IS NULL```NULL不能用等于和不等于判断```IS NOT NULL```
+		```and```，或&&，推荐and，下同
+		```or```或||
+		```not```或！
+
+# Day3
+1. DQL：查询语句
+	1. 排序查询
+	2. 聚合函数
+	3. 分组查询
+	4. 分页查询
+2. 约束
+3. 多表之间的关系
+4. 范式
+5. 数据库的备份和还原
+
+## DQL：查询语句
+
+1. 排序查询
+   语法：```order by 子句```
+   ​	```order by 排序字段1 排序方式1， 排序字段2 排序方式2...```
+   排序方式：
+   ​	ASC：升序，默认
+   ​	DESC：降序
+   注意：
+   ​	如果有多个排序条件，则当前面的条件值一样时，才会判断第二个条件。
+
+2. 聚合函数：将一列数据作为一个整体，进行纵向的计算
+   1. count：计算个数
+      ```SELECT COUNT(ID) FROM STUDENT；```一般用主键做变量，或者\*，\*表示一行中只要有一个值非null就纳入统计
+   2. max：计算最大值
+   3. min：计算最小值
+   4. sum：求和
+   5. avg：计算平均值
+
+   注意：聚合函数的计算，会排除null值。
+   
+3. 分组查询
+
+   1. 语法：```group by 分组字段;```
+   2. 注意
+      1. 分组之后查询的字段：分组字段、聚合函数
+      2. where和having
+         1. where在分组之前进行限定，如果不满足条件，则不参与分组
+         2. having在分组之后进行限定，如果不满足条件，则不会被查询出来
+         3. where后不能跟聚合函数，having后可以进行聚合函数的判断
+
+4. 分页查询
+
+   1. 语法：```limit 开始的索引，每页查询的条数;```【其实是从开始的索引开始，显示n条，索引从0开始】
+   2. limit是一个MySQL的“方言”
+
+## 约束
+
+概念：对表中的数据进行限定，保证数据的正确性、有效性和完整性。
+
+分类：
+
+  1. 主键约束：primary key
+  2. 非空约束：not null
+  3. 唯一约束：unique
+  4. 外键约束：foreign key
+
+### 非空约束：值不能为null
+```NOT NULL```
+1. 创建表添加非空约束
+创建表的时候，在字段后面加上```NOT NULL```
+
+2. 创建表完后添加非空约束
+修改命令
+
+3. 删除非空约束
+用修改命令，不写NOT NULL```alter table stu modify name varchar(20)```
+
+### 唯一约束：值不能重复
+```unique```
+
+注意：唯一约束限定的列的值可以有多个null
+
+1. 创建表的时候跟在字段后面
+2. 创建表后添加唯一约束：修改的时候加载字段后面
+3. 删除唯一约束：删除唯一索引
+```alter table stu drop index phone_number;```
+
+### 主键约束：primary key
+含义：非空且唯一
+一张表只能有一个字段为主键
+
+1. 创建表的时候添加：字段后面跟```primary key```
+2. 删除主键：```alter table stu drop primary key;```
+3. 创建好的表添加主键：修改命令，字段后面加```primary key```
+
+自动增长：如果某一列是数值类型的，使用```auto_increment```。如果填NULL，就会自动获得一个+1的数
+
+写的时候跟在字段后面就行
+
+删除：直接用修改命令就行
+
+### 外键约束foreign key
+让表和表产生关系，从而保证数据的正确性
+
+1. 创建表时，可以添加外键
+	语法：
+```
+	create table 表名(
+		...
+		外键列，
+		constraint 外键名称 foreign key (外键列名称) references 主表名称(主表列名称)
+	);
+```
+删除外键
+
+```alter table stu drop foreign key 外键名称;```
+
+添加外键
+```alter table stu add constraint 外键名称 foreign key (外键列名称) references 主表名称(主表列名称)```
+
+#### 级联操作
+添加外键，设置级联更新：
+```alter table stu add constraint 外键名称 foreign key (外键列名称) references 主表名称(主表列名称) on update cascade```
+```on update cascade```
+```on delete cascade```级联删除
+
+两个可以只有一个，也可以一起
+
+谨慎使用
+
+## 数据库的设计
+
+1. 多表之间的关系
+    一对一
+    一对多
+    多对多
+
+  实现：
+    1. 一对多：在多的一方建立外键，指向一的一方的主键
+    2. 多对多：借助中间表，中间表至少包含2个字段，作为外键，分别指向两张表的主键
+    3. 一对一：任意一方添加唯一外键，指向另一个的主键【很少见，直接合成一张表就行了】
+
+架构设计器里可以看到表的关系
+
+2. 数据库设计的范式
+
+分类：有6种
+
+这里只学3种：
+第一范式1NF：每一列都是不可分割的原子数据项
+第二范式2NF：1NF的基础上，消除非主属性对主码的部分函数依赖
+第三范式3NF：2NF的基础上，消除传递依赖
+
+1NF的问题：
+1. 数据冗余
+2. 添加删除都有一些问题
+
+2NF：
+几个概念：
+1. 函数依赖：通过 属性（属性组）A的值，可以确定唯一的属性B的值，则B依赖于A。A-->B 【如 学号-->姓名】【（学号，课程名称）-->分数】
+2. 完全函数依赖：A是属性组，B的确定需要A属性组中所有的属性值
+3. 部分函数依赖：A是属性组，B的确定只需要A属性组中的部分
+4. 传递函数依赖：A-->B，B-->C，则C传递函数依赖于A
+5. 码：一张表里，一个属性或属性组，被其他所有的属性完全依赖，则这个属性或属性组为该表的码
+6. 主属性：码  属性组中的属性
+7. 非主属性：非码的属性
+
+方法：拆分表
+
+缺点：添加和删除还有问题
+
+3NF：
+消除传递依赖
+拆分表
+
+## 数据库的备份和还原
+
+1. 命令行
+
+```
+备份
+mysqldump -u用户名 -p密码 数据库名> 保存的路径
+还原
+登录-->创建-->使用-->source 文件路径
+
+```
+
+
+2. 图形化工具
+备份
+还原：执行SQL脚本
+
+# Day4
+1. 多表查询
+2. 事务
+3. DCL
+
+## 多表查询
+查询语法：
+```
+select
+	列名列表
+from
+	表名列表
+where...
+```
+查询出来的结果叫：笛卡尔积，会出现A，B的全排列
+
+### 多表查询的分类：
+
+1. 内连接查询
+
+	1. 隐式内连接：使用where条件消除无用的数据
+		例如：```where a.'b_id' = b.'id'```   引号可以不加
+		一般写的时候，都在from里给表名起个别名
+	2. 显式内连接：
+		```select 字段列表 from 表名1 inner join 表名2 on 条件```inner可以省略
+
+
+2. 外连接查询
+	1. 左外连接：
+		语法：
+		```select 字段列表 from 表1 left [outer] join 表2 on 条件```
+		查询的是左表所有数据以及其交集的部分
+
+	2. 右外连接：
+		```select 字段列表 from 表1 right [outer] join 表2 on 条件```
+		查询的是右表所有数据以及其交集的部分
+
+3. 子查询
+查询中嵌套查询，称嵌套查询为子查询
+例如：```select * from t1 where t1.a = (select max(a) from t1)
+
+子查询的不同情况：
+1. 单行单列：作为条件，判断
+2. 多行单列：作为条件，用in判断
+3. 多行多列：作为一个虚拟表
+
+## 事务
+1. 事务的基本介绍
+
+	1. 概念：多个操作被事务管理，要么同时成功，要么同时失败
+
+	2. 操作
+		1. 开启事务：start transaction
+		2. 回滚：rollback
+		3. 提交：commit
+
+	3. MySQL数据库中，事务默认自动提交【即会被保存】
+	   Oracle数据库默认手动提交
+	   更改：
+	   ```select @@autocommit;```查看提交方式，1自动，0手动
+	   ```set @@autocommit;```会改为手动，这样增删改命令后如果不手动commit就不会被保存
+
+
+2. 事务的四大特征ACID atomic consistency isolation durability
+	1. 原子性：不可分割的最小操作单位，要么同时成功，要么同时失败
+	2. 持久性：事务提交或回滚后，数据库会持久化的保存数据
+	3. 隔离性：多个事务之间相互独立
+	4. 一致性：事务操作前后，数据总量不变
+
+3. 事务的隔离级别（了解）
+
+多个事务操作同一批数据，会出问题：
+
+​	1. 脏读：一个事务，读取到另一个事务中没有提交的数据
+​	2. 不可重复读（虚读）：同一个事务中，两次读取到的数据不一样
+​	3. 幻读：一个事务操作数据表中所有记录，另一个事务添加了一条数据，则第一个事务查询不到自己的修改
+
+隔离级别：
+	1. read uncommitted：会脏读、虚读、幻读
+	2. read committed（Oracle默认）：会虚读、幻读
+	3. repeatable read（MySQL默认）：幻读
+	4. serializable：没问题
+
+隔离级别越高，效率越低
+查询、修改隔离级别（不用记）：
+```
+select @@tx_isolation;
+set global transaction isolation level 级别字符串;（图形化界面中重启后才能查看到生效）
+```
+
+## DCL
+1. 管理用户
+	1. 添加用户：```create user '用户名'@'主机名' identified by '密码';```
+	2. 删除用户：```drop user '用户名'@'主机名';```
+	3. 修改密码：
+		1. ```update user set password = password('新密码') where user = '用户名';```
+		2. ```set password for '用户名'@'主机名' = password('新密码');```
+	4. 查询用户：切换到mysql数据库，查询user表【%表示可以在任意主机使用用户登录】
+
+如果忘记root密码：
+```
+1. cmd --> net stop mysql   停止mysql服务，管理员运行
+2. mysqld --skip-grant-tables   无验证方式启动mysql服务
+3. 新cmd窗口，mysql
+4. use mysql
+5. update user set password = password('新密码') where user = 'root';
+6. 关闭窗口，任务管理器结束mysqld.exe进程
+```
+
+2. 权限管理：
+
+	1. 查询权限：```show grants for '用户名'@'主机名';```
+	2. 授予权限：```grant 权限列表 on 数据库.表 to '用户名'@'主机名';```通配符：```grant all on *.* to 'root'@'localhost';```
+	3. 撤销权限：```revoke 权限列表 on 数据库.表 from '用户名'@'主机名';```
+
+
+# Day5
+1. JDBC基本概念
+2. 快速入门
+3. 对JDBC中各个接口和类详解
+
+## JDBC
+
+概念：Java DataBase Connectivity
+
+Java数据库连接，Java语言操作数据库
+
+定义的一套操作所有关系型数据库的规则，即接口。
+
+数据库驱动：数据库厂商实现接口的jar包。
+
+### JDBC快速入门
+
+步骤：
+  1. 下载jar包，导包
+  2. 注册驱动
+  3. 获取数据库连接对象 Connection
+  4. 定义sql
+  5. 获取执行sql语句的对象 Statement
+  6. 执行sql，接受返回结果
+  7. 处理结果
+  8. 释放资源
+
+1. 导包：建了libs文件夹后，要右键，add as library
+2. 注册驱动```Class.forName("com.mysql.jdbc.Driver");//据说已过时，新的上网查```
+3. 获取对象```Connection conn = DiverManager.getConnection("jdbc:mysql://localhost:3306/db3","root","password");```
+4. 定义sql语句```String sql = "update account set balance = 500 where id = "1";```
+5. 获取执行sql的对象```Statement stmt = conn.createStatement();```
+6. 执行sql```int count = stmt.executeUpdate(sql);```
+7. 处理结果
+8. 释放资源```stmt.close();conn.close();```
+
+## 详解各个对象
+1. DriverManager：驱动管理对象
+
+	功能：
+	1. 注册驱动：告诉程序应该使用哪一个数据库驱动jar
+		包里面有个静态方法registerDriver。但是有个静态代码块调用了这个方法，所以可以直接Class,forName导包即可。
+
+		mysql5之后的驱动jar包可以省略注册驱动的步骤
+
+	2. 获取数据库连接
+		```static Connection getConnection(String url, String user, String password);```url：指定的ip端口和数据库的名称```jdbc:mysql://ip:端口/数据库名称```如果是本机的3306端口的mysql，可以简写为```jdbc:mysql:///数据库名称```
+
+2. Connection：数据库连接对象
+
+	功能：
+	
+	1. 获取执行sql的对象
+```
+Statement createStatement();
+PreparedStatement prepareStatement(String sql);
+```
+
+	2. 管理事务
+		开启事务：```setAutoCommit(boolean autoCommit)```调用该方法，参数设置成false，即开启事务
+		提交事务：```commit()```
+		回滚事务：```rollback()```
+
+3. Statement：执行sql的对象
+	执行sql：
+	
+4. ResultSet：结果集对象，封装查询结果
+	```boolean next()```游标向下移动一行。初始游标位于第一行之前，第一次调用后移动到第一行。当当前行已经在最后一行以下，返回false，否则为true。
+	```getXxx(参数)```获取数据。```Xxx```代表数据类型，如getInt、getString。参数包括2种：
+		1. int：列的编号，从1开始。
+		2. String：列的名称
+
+遍历：
+```
+while(rs.next()){
+	int id = rs.getInt(1);
+	...
+}
+```
+
+5. PreparedStatement：执行sql的对象
+	SQL注入问题：在拼接sql语句的时候，有一些sql的特殊关键字参与字符串的拼接，会造成安全问题
+	解决：使用PreparedStatement
+	预编译的SQL：参数使用```？```作为占位符
+	步骤：
+		1. 导包，注册驱动，获取数据库连接对象
+		2. 定义sql，注意这时用？作为占位符
+		3. 获取执行sql语句的对象，注意需要传入参数```Connection.prepareStatement(String sql)```
+		4. 给```?```赋值：
+			方法：```setXXX(参数1,参数2)```
+				参数1：```?```的位置编号，从1开始
+				参数2：```?```的值
+		5. 执行sql，接受返回结果，不需要传递sql语句
+		6. 处理结果，释放资源
+
+## 抽取共同代码写个工具类：
+获取src路径下的文件路径：
+```
+ClassLoader cl = JDBCUtils.class.getClassLoader();//随便找个类
+URL r = classLoader.getResource("jdbc.properties");
+String path = r.getPath();
+
+```
+
+## JDBC控制事务
+使用Connection对象管理事务
+
+# Day6
+1. 数据库连接池
+2. Spring JDBC：JDBC Template
+
+## 数据库连接池DataSource
+概念：存放数据库连接的容器（集合）。
+	系统初始化好后，容器被创建，容器中会申请一些连接对象。用户访问数据库时，从容器中获取连接对象，访问完后，连接对象归还给容器。
+
+好处：
+节约资源，访问高效。
+
+实现：
+	1. 标准接口：```DataSource``` ```javax.sql```包下的。
+		方法：
+			获取连接：```getConnection()```
+			归还连接：调用```Connection.close()```表示归还连接
+
+	2. 数据库厂商实现
+		1. C3P0：
+		2. Druid：阿里巴巴，德鲁伊
+
+### C3P0
+步骤：
+1. 导入jar包（3个，包括一个数据库驱动包）
+2. 定义配置文件：```c3p0.properties或者c3p0-config.xml```，路径放置在src目录下即可【要在classpath的最顶层】
+3. 创建核心对象：数据库连接池对象ComboPooledDataSource
+4. 获取连接：getConnection
+
+连接池参数：
+初始化申请的连接数
+最大的连接数量
+超时时间
+
+ComboPooledDataSource();可以传入一个字符串参数，可以使用别的配置
+
+### Druid
+步骤：
+1. 导入jar包（1个+数据库驱动）
+2. 定义配置文件：可以用.properties，可以叫任意名称，可以放在任意目录下
+3. 获取数据库连接池对象：通过工厂类来获取```DruidDataSourceFactory```
+4. 获取连接：getConnection
+
+```
+//加载配置文件
+Properties pro = new Properties();
+InputStream is = DruidDemp.class.getClassLoader().getResourceAsStream("wenjianming.properties");
+pro.load(is);
+
+//
+DataSource sc = DruidDataSourceFactory.createDataSource(pro);
+
+Connection conn = ds.getConnection();
+
+```
+
+## Spring JDBC
+
+Spring框架对JDBC的简单封装，提供了一个JDBCTemplate对象简化JDBC的开发。
+
+步骤：
+1. 导包
+2. 创建JDBCTemplate对象，依赖于数据源DataSource
+3. 调用方法进行CRUD：
+```
+update()执行DML语句，增删改，sql语句里可以用？占位
+queryForMap()查询结果，结果封装为map集合。只能查询1条记录
+queryForList()查询结果，结果封装为list集合，list集合里的元素是Map，对应一条记录
+query()查询结果，结果封装为JavaBean对象
+queryForObject(sql,A.class)查询结果，结果封装为A的对象
+
+query()传入的第二个参数：
+new BeanPropertyRowMapper<T>(T.class)
+注意这里的JavaBean的变量都用包装类定义，不然null传入的时候会报错
+```
+
+Ctrl+P显示需要传入的参数
+
+
+
+# Day 7
+
+1. Web概念概述
+2. HTML
+
+## Web概念概述
+JavaWeb：使用Java语言开发基于互联网的项目，或开发互联网相关的java计数。
+
+软件架构：
+C/S：
+优点：用户体验好
+缺点：开发、安装、部署、维护 麻烦
+B/S：
+优点：开发、安装、部署、维护 简单
+缺点：对硬件要求高，应用过大用户体验会很差
+
+B/S架构：
+  资源分类：
+    1. 静态资源：
+	  使用静态网页开发技术发布的资源。
+	  特点：
+	    + 所有用户访问，得到的结果是一样的
+	    + 如：文本，图片，音频，视频，HTML，CSS，JavaScript
+	    + 如果用户请求的是静态资源，那么服务器会直接将静态资源发送给浏览器。浏览器中内置了静态资源的解析引擎，可以展示静态资源
+
+    2. 动态资源
+      使用动态网页技术发布的资源，
+      特点：
+        + 所有用户访问，得到的结果可能不一样
+        + 如：jsp/servlet，php，asp...
+        + 如果用户请求的是动态资源，那么服务器会执行动态资源，转换为静态资源后，发送给浏览器
+
+学习动态资源，要先学习静态资源
+
+静态资源：
+  + HTML：用于搭建基础网页，展示页面的内容
+  + CSS：用于美化页面，布局页面
+  + JavaScript：控制页面的元素，让页面有一些动态的效果
+
+## HTML
+是最基础的网页开发语言
+
+Hyper Text Markup Language 超文本标记语言
+
+超文本：超文本是用超链接的方法，将各种不同空间的文字信息组织在一起的网状文本。
+
+标记语言：由标签构成的语言。```<标签名称>```如html，xml。标记语言不是编程语言。
+
+### 快速入门
+1. html文档的后缀名是```.html 或 .htm```【两个完全一样】
+2. 标签分为：
+  1. 围堵标签：有开始标签和结束标签。如```<html> <\html>```
+  2. 自闭合标签：只有一个标签，开始标签和结束标签在一起。```<br\>```
+3. 标签可以嵌套
+4. 在开始标签中可以定义属性。属性是由键值对构成，值需要用引号（单双都可以）引起来
+5. html的标签不区分大小写，但是**建议使用小写**
+
+注释的写法：
+```
+<!-- 注释的内容 -->
+```
+
+html的语法并不是很严格
+html5已不支持的语法，浏览器依旧可以显示，浏览器会向下兼容。
+
+### 标签
+1. 文件标签：构成html最基本的标签
++ html：html文档的根标签
++ head：头标签，用于指定html文档的一些属性，引入外部的资源。
++ title：标题标签
++ body：体标签
++ ```<!DOCTYPE>```：定义文档类型```<!DOCTYPE html>```，html5的写法。IDE里创建了就会带，lang属性默认en，可以改成ch，或者删掉
+
+2. 文本标签：和文本有关的标签
++ ```<h1> to <h6>```标题标签
++ p：段落标签
++ br：换行。内容中的换行和Tab都会被解析成1个空格。自闭合标签/空标签。```<br/> 写成<br>也可以```
++ hr：显示一条水平线，自闭合标签。有一些属性可以控制样式，但是一般用CSS来控制样式，很少用这些属性。【color，width，size，align（对齐center/left/right），这些HTML5已不支持】
++ b：字体加粗
++ i：斜体
++ font：字体标签【color，size，face（字体）】【HTML不支持】
+
+属性定义：
++ color：
+  1. 英文单词：red，green，blue
+  2. rgb(值1，值2，值3)：0~255，有很多已结不支持了
+  3. ```#值1值2值3```：00~FF
+
++ width
+  1. 数值，单位默认px（像素）
+  2. ```数值%```，占比，相对父元素的占比。【body，屏幕的宽度】
+
+空格：```&nbsp;```
+
+3. 图片标签
+
+img：展示图片。自闭合的标签。
+
+属性：
+src=路径，指定图片的位置（只需要记这个）
+alt：图片展示失败时显示的文字
+height，width
+
+4. 列表标签
+    有序列表：
+   ol：order list
+   lo：列表项，每个都要包起来，默认1. 2. 3. type属性修改，用CSS修改
+    无序列表：
+   ul：
+   li：还是type修改点的样式，html5不支持
+
+5. 链接标签：超链接
+a
+属性：
+    href：指定访问资源的URL（统一资源定位符），既可以是本地资源，也可以是网络资源
+    ```target="_self"```默认self，在本页面打开。blank：在新选项卡展示
+
+6. div和span，块标签
+span：没有效果，结合CSS使用
+行内标签，内联标签
+
+div：也没有任何样式
+每一个div占满一整行。块级标签
+
+7. 语义化标签：html5中为了提高程序可读性，提供的一些标签，没有任何样式
+header
+
+footer
+
+8. 表格标签
+
+表格是一行一行写的。先定义一个大表，然后创建第一行，写第一行的单元格；再写第二行……
+
+table：定义表格
+  border：边框
+  width：宽度【不支持】
+  cellspacing：内容与单元格的距离【不支持】
+  cellpadding：单元格之间的距离【不支持】
+  bgcolor：背景色【不支持】
+  align：对齐方式【不支持】
+tr：定义行
+  bgcolor：背景色【不支持】
+  align：对齐方式【不支持】
+td：定义单元格
+  colspan：跨行合并
+  rowspan：跨列合并
+th：定义表头单元格
+
+下面依旧是标签，写在table里面
+caption：表格标题
+thead：表示表格的头部分，没样式，语义化标签
+tbody：表示表格的体部分，没样式，语义化标签
+tfoot：表示表格的脚部分，没样式，语义化标签【tfoot一定会在tbody后面展示】
+
+# Day8
+1. HTML标签：表单标签
+2. CSS
+
+## HTML标签：表单标签
+表单：
+  用于采集用户输入的数据的。用于和服务器进行交互。
+
+标签：
+form
+  属性：
+    action：指定提交数据的URL
+    method：指定提交方式
+      分类：一共7种，2种比较常用
+        get：
+          1. 请求参数会在地址栏中显示。会封装在请求行中。
+          2. 请求参数的大小有限制
+          3. 不太安全
+        post：
+          1. 请求参数不会在地址栏中显示。会封装在请求体中。
+          2. 请求参数的大小没有限制
+          3. 较为安全
+
+name：表单项中的数据想要被提交，必须指定其name属性
+
+表单项标签：
+  input：可以通过type属性值，改变元素的展示样式
+    type属性：
+      text：文本输入框，type的默认值
+        value：指定默认值
+        placeholder：输入框的提示信息，输入框内容发生改变时，会自动清空
+      password：密码输入框
+      radio：单选框
+        注意：
+          1. 多个单选框实现单选，name值必须一样
+          2. 一般要给每个单选框提供value属性，指定选中后提交的值
+          3. checked属性，可以指定默认值。可以赋值为"checked"，也可以什么都不写
+      checkbox：复选框
+        注意：一般也要指定value，也可以设置checked
+      file：文件选择框
+      hidden：隐藏域，用来提交一些信息。
+    按钮：
+      submit：提交按钮，可以提交表单
+      button：普通按钮
+      image：图片提交按钮
+        src属性指定图片的路径
+      data：选择日期，年月日。
+      datatime-local：日期，包括时分秒。
+    label：指定输入项的文字描述信息
+      注意：有属性，for。与input的id属性值对应。对应后，点击label区域，会让input输入框获得焦点。【id可以是一个字符串】
+
+  select：下拉列表
+    子元素：option，指定列表项
+      value：指定提交值
+      selected：默认值
+  textarea：文本域
+    cols：指定列数，每行有多少个字符
+    rows：默认多少行
+
+## CSS：页面美化和布局控制
+Cascading Style Sheets 层叠样式表
+  层叠：多个样式可以作用在同一个html的元素上，同时生效
+
+好处：
+1. 功能强大
+2. 将内容展示与样式控制分离：降低耦合度，解耦，让分工协作更容易，提高开发效率
+
+CSS的使用：CSS与html结合方式
+1. 内联样式
+    在标签内使用style属性指定css代码。【不推荐使用】
+
+2. 内部样式
+    在head标签内，定义style标签，style标签的标签体内容就是css代码
+
+3. 外部样式
+    先定义css资源文件，然后在head标签内，定义link标签，引入外部的资源文件
+```<link rel="stylesheet" href="css/a.css">```
+
+3还有一种不常用的写法：
+```
+<style>
+    @import "css/a.css"
+</style>
+```
+
+### CSS基本语法
+格式：
+```
+选择器{
+    属性名1：属性值1；
+    属性名1：属性值1；
+    ...
+}
+```
+选择器：筛选具有相似特征的元素
+注意：每一对属性要用分号隔开，最后一对可写可不写。
+
+### 选择器
+筛选具有相似特征的元素
+分类：
+1. 基础选择器
+  1. id选择器：选择具体的id属性值的元素
+
+    语法：```#id属性值{}```多个属性用逗号隔开
+
+  2. 元素选择器：选择具有相同标签名称的元素
+
+    语法：```标签名称{}```
+
+  3. 类选择器：选择具有相同的class属性值的元素
+
+    语法：```.class属性值{}```
+
+一般设置id唯一，class可以多个共用
+优先级：id>类>元素
+2. 扩展选择器
+  1. 选择所有元素：
+
+    语法：```*{}```
+
+  2. 并集选择器：
+
+    语法：```选择器1，选择器2{}```逗号
+
+  3. 子选择器：筛选选择器1元素下的选择器2元素
+
+    语法：```选择器1 选择器2{}```空格
+
+  4. 父选择器：筛选选择器2的父元素选择器1
+
+    语法：```选择器1>选择器2{}```
+    还可以有属性first-child
+
+  5. 属性选择器：选择元素名称，属性名=属性值的元素
+
+    语法：```元素名称[属性名=“属性值”]{}```
+
+  6. 伪类选择器：选择一些元素具有的状态
+
+    语法：```元素：状态{}```
+    如：```<a>```
+      状态：
+        link：初始化的状态
+        visited：被访问过的状态
+        active：正在访问的状态
+        hover：鼠标悬浮状态
+
+### 属性
+
+1. 字体、文本
++ font-size：字体大小
++ color：文本颜色
++ text-align：对齐方式
++ line-height：行高
+
+2. 背景
+
++ background：复合属性
+可以设置图片：url
+
+3. 边框
++ border：设置边框，复合属性
+边框有4条边，可以分别设置：border-bottom/left/right/type
+复合属性一次可以传入一个列表，如：
+```border: 1px solid red;```
+
+4. 尺寸
++ height：高度
++ width：宽度
+
+5. 盒子模型
++ margin：外边距，复合属性。一个值会赋值给所有。left/bottom/right/top。auto，水平居中
++ padding：内边距，复合属性。默认情况下内边距会影响整个盒子的大小。用```box-sizing:border-box;```设置盒子的属性，让width和height就是最终盒子的大小。
++ float：浮动
+  left：左浮动。有点像左对齐的感觉，位置够就会并在一行。
+  right：右浮动。
+
+# Day9
+JavaScript
+
+JS基础
+
+概念：一门客户端脚本语言
+运行在客户端浏览器中的。每一个浏览器都有JS的解析引擎。
+脚本语言：不需要编译，直接就可以被浏览器解析执行
+
+功能：可以增强用户和html页面的交互过程，可以控制html元素，让页面有一些动态效果，增强用户的体验。
+
+JavaScript = ECMAScript + JavaScript自己特有的东西（BOM + DOM）
+
+## ECMAScript：客户端脚本语言的标准
+1. 基本语法：
+  1. 与html的结合方式：
+        1. 内部JS：定义```<script></script>```，标签体内容就是js代码
+            2. 外部JS：定义```<script></script>```，通过src属性引入外部的js文件
+        注意：
+
+    + ```<script>```可以定义在html页面的任何地方，但是定义的位置会影响执行顺序。
+    + 可以定义多个```<script>```
+
+  2. 注释：和java一样
+  3. 数据类型：
+
+    + 原始数据类型
+      1. number：数字。整数/小数/NaN(not a number)
+      2. string：字符串。没有字符。
+      3. boolean：true/false
+      4. null：对象为空
+      5. undefined：未定义。如果一个变量没有给初始化的值，那么默认赋值为undefined。
+    + 引用数据类型：对象
+  4. 变量：弱类型
+
+    语法：```var 变量名 = 初始化值;```
+
+```document.write(a);```换行用```<br>```
+```typeof(a)```显示a的类型
+
+  5. 运算符
+        1. 一元运算符：
+注意：在JS中，如果运算数不是运算符所要求的类型，那么JS引擎会自动的将运算数进行类型转换：
+其他类型转number：
+      string：按字面值转换。如果不是数字，转换为NaN，NaN与任何数运算还是NaN。
+      boolean：true转为1，false转为0
+
+            2. 算术运算符
+            3. 赋值运算符
+            4. 比较运算符```===```全等于
+类型相同，直接比较。
+      字符串：按字典顺序，逐位比较。
+
+类型不同，先进行类型转换，再比较。
+  全等于会先判断类型，类型不一样则直接返回false。
+
+    5. 逻辑运算符
+其他类型转boolean：
+  number：0或NaN为假，其他为真。
+  string：除了空字符串```""```，其他都是true。
+  null&undefined：都是false。
+  对象：所有对象都是true。
+
+    6. 三元运算符```? : ```
+
+  6. 流程控制语句
+JS里switch语句没有类型限制。
+
+  7. 特殊语法
+        1. 句尾的分号可以省略（不建议）
+            2. 定义变量的时候，如果不写var，是全局变量，写var是局部变量。
+
+2. 基本对象
+Function：函数对象
+```
+1. 创建
+方式1：
+var fun = new Function(形参列表，方法体);//这种方法不用
+方式2
+function 方法名称(形参列表){
+    方法体
+}
+方式3：
+var 方法名 = function(形参列表){
+    方法体
+}
+
+2. 方法
+3. 属性
+
+length：形参的个数
+
+4. 特点
+
+  1. 方法定义的时候，形参的类型不用写，返回值类型也不写
+  2. 方法是一个对象，如果定义名称相同的方法，会覆盖
+  3. 在JS中，方法的调用只与方法的名称有关，和参数列表无关
+  4. 在方法声明中有一个隐藏的内置对象：数组arguments，封装了所有的实际参数
+
+5. 调用
+
+方法名称(实际参数列表);
+
+```
+
+Array：数组对象
+```
+1. 创建
+方法一：
+var arr = new Array(元素列表);
+方法二：
+var arr = new Array(默认长度);
+方法三：
+var arr = [元素列表];
+2. 方法
+join(参数)：将数组中的元素按照指定的分隔符拼接成字符串（默认为逗号）
+push()：向数组的末尾添加一个或更多元素，并返回新的长度。
+
+3. 属性
+length：数组的长度
+
+4. 特点
+  1. 在JS中，数组的元素的类型可变
+  2. 在JS中，数组的长度可变
+
+```
+Boolean
+Date
+```
+1. 创建
+var data = new Date();
+
+2. 方法
+toLocaleString():返回当前Date对象对应的时间本地字符串格式
+getTime():获取毫秒值。
+```
+Math
+```
+1. 创建
+不用创建，直接使用。Math.方法名()
+
+2. 方法
+random():返回0~1之间的随机数。含0不含1
+ceil(X)：向上取整
+floor(X)：向下取整
+round(x)：四舍五入
+
+3. 属性
+PI
+
+```
+Number
+String
+RegExp：正则表达式对象
+正则表达式：
+  1. 单个字符：[ ]
+
+    如```[a] [ab] [a-zA-Z0-9_]=\w \d
+  2. 量词符号：```? * +```0/1 任意 1+```{m,n}```6~12位，包含两边
+  3. 开始结束符号：```^ $```
+```
+1. 创建
+方式一：
+var reg = new RegExp("正则表达式");//这里要注意，\表示转义字符，\w要写成\\w
+方式二：
+var reg = /正则表达式/;常用这个
+2. 方法
+test(参数)：验证指定的字符串是否符合正则表达式
+```
+Global：全局对象
+其中封装的方法不需要对象，直接调用。  方法名();
+```
+encodeURI():URI编码
+decodeURI():URI解码
+
+encodeURIComponent():URI编码，冒号等也编码
+decodeURIComponent():URI解码
+
+parseInt():字符串转为数字。会逐一判断每个字符是否是数字，直到不是数字为止，将前边数字部分转为number
+
+idNaN():判断一个值是否是NaN。
+  NaN六亲不认，参与的比较全是false
+
+eval：将字符串转换为JS脚本代码来执行
+
+```
+URL中的中文进行了编码，一个百分号是一个字节
+
+# Day10
+BOM
+DOM，事件
+
+## BOM
+概念：Browser Object Model 浏览器对象模型
+将浏览器的各个组成部分封装成对象。
+
+组成
+1. Window：窗口对象
+  1. 创建
+  2. 方法
+        1. 与弹出框有关的方法
+```
+alert()显示带有一段消息和一个确认按钮的警告框
+confirm()显示带有一段消息以及确认按钮和取消按钮的对话框
+  如果用户点确定，方法返回true，用户点取消，方法返回false
+prompy() 显示可提示用户输入的对话框
+  返回值：用户的输入
+```
+    2. 与打开关闭有关的方法
+```
+close()关闭浏览器窗口
+  谁调用，关闭谁
+open()打开一个新的浏览器窗口
+  返回新的window对象
+```
+    3. 与定时器有关的方法
+```
+setTimeout()在指定的毫秒数后调用函数或计算表达式
+  参数
+    1. js代码或方法对象
+    2. 毫秒值
+  返回值：唯一标识，用于取消定时器
+clearTimeout()取消setTimeoutsetTimeout()方法设置的timeout
+
+setInterval()按指定的周期（毫秒计）来调用函数或肌酸表达式
+clearInterval()取消setInterval()方法设置的timeout
+```
+
+  3. 属性
+        1. 获取其他BOM对象
+        history
+        location
+        Navigator
+        Screen
+          2. 获取DOM对象
+        document
+  4. 特点
+
+    + window对象不需要创建，可以直接使用。```window.方法名()```
+    + window引用也可以省略，直接```方法名()```
+
+2. Navigator：浏览器对象
+3. Screen：显示器屏幕对象
+4. History：历史记录对象
+  1. 创建（获取）：```window.history```或```history```
+  2. 方法
+```
+back()		加载history列表中的前一个URL
+forward()	加载history列表中的后一个URL
+go(参数)	   加载history列表中的某个具体页面
+  参数：
+    正数：前进几个历史记录，go(1)=forward()
+    负数：后退几个历史记录
+```
+  3. 属性
+
+    length：返回当前窗口历史列表中的URL数量
+
+
+5. Location：地址栏对象
+  1. 创建（获取）：```window.location```或```location```
+  2. 方法
+
+    ```reload```：重新加载当前文档。刷新
+
+  3. 属性
+
+    ```href```：设置或返回完整的URL
+
+
+## DOM
+概念：Document Object Model 文档对象模型
+将标记语言文档的各个组成部分，封装为对象。可以使用这些对象，对标记语言文档进行CRUD的动态操作
+
+W3C DOM 标准被分为3个不同的部分：
+核心 DOM：针对任何结构化文档的标准模型
+  Document：文档对象
+  Element：元素对象
+  Attribute：属性对象
+  Text：文本对象
+  Comment：注释对象
+
+  Node：节点对象，其他5个对象的父对象
+XML DOM：针对XML文档的标准模型
+HTML DOM：针对HTML文档的标准模型
+
+核心DOM模型：
+Document：文档对象
+  1. 创建（获取）：在html dom模型中，可以使用window对象来获取
+  2. 方法
+        1. 获取Element对象
+```
+1. getElementById()根据id属性值获取元素对象，id属性值一般唯一
+2. getElementByTagName()根据元素名称获取元素对象们，返回值是一个数组
+3. getElementByClassName()根据Class属性获取元素对象们，返回值是一个数组
+4. getElementByName()根据name属性获取元素对象们，返回值是一个数组
+```
+    2. 创建其他DOM对象
+```
+createAttribute()
+createComment()
+createElement()
+createTextNode()
+```
+  3. 属性
+
+
+Element：元素对象
+  1. 创建（获取）：通过document来获取和创建
+  2. 方法
+```
+removeAttribute()：删除属性
+setAttribute()：设置属性
+```
+Node：节点对象，其他5个的父对象
+  特点：所有dom对象都可以被认为是一个节点
+  方法
+    CRUD dom树：
+```
+appendChild():向节点的子节点列表的结尾添加新的子节点
+removeChild():删除（并返回）当前节点的指定子节点
+replaceChild():用新节点替换一个子节点
+```
+  属性
+    parentNode 返回节点的父节点
+
+```
+href = "javascript:void(0)"; //可以被点击的样式，但是不跳转
+```
+
+
+
+value属性获取内容
+this获取当前对象
+
+
+HTML DOM
+1. 标签体的设置和获取：innerHTML
+2. 使用html元素对象的属性
+3. 控制元素样式
+  1. 使用元素的style属性来设置（每个元素都有这个属性，后面直接点CSS的属性） 
+  2. 提前定义好类选择器的样式，通过元素的className属性来设置其class属性值
+
+
+
+### 简单学习
+功能：控制html文档的内容
+
+获取页面标签（元素）对象：Element
+```document.getElementById("id值")：通过元素的id获取元素对象```
+
+操作Element对象：
+1. 修改属性值：
+  1. 明确获取的对象是哪一个？
+  2. 查看API文档，找其中有哪些属性可以设置
+
+2. 修改标签体内容：
+    属性：```innerHTML```
+  1. 获取元素对象
+  2. 使用innerHTML属性修改标签体内容
+
+
+## 事件简单学习
+功能：某些组件被执行了某些操作后，触发某些代码的执行。
+
+如何绑定事件：
+1. 直接在html标签上，指定事件的属性（操作），属性值就是js代码
+事件```onclink```单击事件
+
+2. 通过js获取元素对象，指定事件属性，设置一个函数
+
+debug：F12，在Console里看
+
+## 事件监听机制
+事件：某些操作
+事件源：组件
+监听器：代码
+注册监听：将事件，事件源，监听器结合在一起。当事件源上发生了某个事件，则触发执行某个监听器代码。
+
+常见的事件：
+1. 点击事件
+```
+onclick：单击事件
+ondbclick：双击事件
+```
+2. 焦点事件
+```
+onblur:失去焦点：一般用于表单校验
+onfocus:元素获得焦点
+```
+
+3. 加载事件
+```
+onload：一张页面或一幅图像完成加载：window.onload = ..
+```
+
+4. 鼠标事件
+```
+onmousedown：鼠标按钮被按下
+onmouseup：鼠标按键被松开
+onmousemove：鼠标被移动
+onmouseover：鼠标移动到某元素智商
+onmouseout：鼠标从某元素移开
+```
+定义方法时，定义一个形参，接受event对象。调用event.button属性可以判断哪个键点击的
+5. 键盘事件
+```
+onkeydown：某个键盘按键被按下
+onkeyup：某个键盘按键被松开
+onkeypress：某个键盘按键被按下并松开
+```
+event.keyCode
+6. 选中和改变
+```
+onchange：域的内容被改变
+onselect：文本被选中
+```
+
+7. 表单事件
+```
+onsubmit：确认按钮被点击，可以阻止表单的提交，return false就会阻止提交。如果写在onclick属性里，要写return checkForm()
+onreset：重置按钮被点击
+```

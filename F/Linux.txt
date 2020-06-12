@@ -29,6 +29,10 @@ VirtualBox的鼠标解放：必须用右边的Ctrl+Alt
 用户名@主机名 当前目录
 #表示身份识别符，用root登录显示#，用普通用户登录显示$
 
+
+
+【黑马，VM12Pro秘钥：5A02H-AU243-TZJ49-GTC7K-3C61N】
+
 ## 关机指令：
 1. shutdown -h now（正常关机）
 2. half（关闭内存）
@@ -1430,3 +1434,128 @@ update user set host = '%' where host = '127.0.0.1';
 mysql>flush privileges;
 ### 3. 项目上线
 解压项目包，将uploa内容上传到服务器站点目录（/var/www/html)
+
+
+# 黑马
+CRT 远程连接软件
+
+/根目录
+~家目录
+root的家目录/root
+
+ls -a显示所有，包括隐藏文件
+ls -l显示详细信息，简写ll
+
+cd -返回上一次所在的目录
+
+mkdir和rmdir【删不了非空文件夹，用的不多】
+mkdir -p多级目录
+
+cat/more【回车一行，空格一屏幕，q退出】/less【比more多一个上下箭头翻动】
+tail -f 文件【动态查看，常用于查看日志变化】
+
+rm删除文件
+rm -r 删除文件夹
+rm -f 不询问是否删除
+一起用 rm -rf
+rm -rf /* 删除root下所有文件，自杀
+
+tar -cvf 打包      .tar
+tar -zcvf 压缩     .tar.gz
+-x解压
+-c打包
+-v显示过程信息
+-f指定文件
+
+-C 指定解压到的文件夹
+
+
+find
+
+grep xxx file --color -A1 -B1
+--color 高亮xxx  A1：除了匹配行，还显示后面的1行 B前面 After Before
+
+
+vim内：
+底行模式
+/8080 搜索8080
+
+
+ps -ef查看进程
+kill -9 pid 强制杀死-9
+
+
+网络操作
+hostname查看主机名
+hostname xxx修改主机名【暂时的，永久改/etc/sysconfig/network】
+
+ifconfig看ip改ip【永久/etc/sysconfig/network-scripts/ifcfg-eth0】
+service network restart重启网络服务
+防火墙service iptables start/stop/restart/status
+
+域名映射
+/etc/hosts
+
+Linux安装软件
+RPM包：红帽，但是不安装依赖
+yum：RPM规范打包好的，在线安装，会下依赖
+
+FTP客户端工具：
+FileZilla
+lrzsz【感觉依托于CRT？】rz和sz
+sftp【感觉还是依托于CRT】put和get
+
+
+
+查看Linux系统的位数【32/64】
+getconf LONG_BIT
+
+java安装：
+删除原来的：
+查看当前安装的：rpm -qa | grep java【rpm是红帽的包管理】
+卸载rpm -e --nodeps 后面跟上面那个命令的输出
+
+JDK的环境变量：
+JAVA_HOME
+CLASSPATH=.:$JAVA_HOME/lib.tools.jar
+PATH=$JAVAHOME/bin:$PATH
+export JAVA_HOME CLASSPATH PATH
+
+MySQL安装：
+查看当前安装的：rpm -qa | grep java
+卸载rpm -e --nodeps 后面跟上面那个命令的输出
+安装服务端
+rpm -ivh xxxserver
+会随机生成一个密码在日志里给出路径
+安装客户端
+rpm -ivh xxxclient
+
+service mysql start
+
+随机密码登录后设置密码
+set password = password('密码');
+
+开放远程访问权限
+grant all privileges on *.* to 'root' @'%' identified by '密码';
+flush privileges;刷新
+
+后面还要打开防火墙3306
+
+redis安装：
+先下gcc-c++
+下载redis
+解压，编译make
+然后安装：make install
+然后要找一下config文件，在原来解压的文件夹里，编译好的地方没有
+
+
+部署项目
+
+打war包：build标签里面可以指定filename标签，指定war包的名称
+
+记得导数据库【本地导出，服务器导入】
+
+druid.properties里
+url后面要加上字符集characterEncoding=utf-8
+
+然后把war包扔到webapps里

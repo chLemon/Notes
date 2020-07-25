@@ -881,6 +881,15 @@ ComboPooledDataSource();可以传入一个字符串参数，可以使用别的�
 步骤：
 1. 导入jar包（1个+数据库驱动）
 2. 定义配置文件：可以用.properties，可以叫任意名称，可以放在任意目录下
+```
+driverClassName=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/learn
+username=root
+password=root
+initialSize=5
+maxActive=10
+maxWait=3000
+```
 3. 获取数据库连接池对象：通过工厂类```DruidDataSourceFactory```来获取
 4. 获取连接：getConnection
 
@@ -1087,7 +1096,7 @@ alt
 ol
 	order list
 
-lo
+li
 	列表项，每个都要包起来，默认1. 2. 3.
 ```
 
@@ -1255,7 +1264,10 @@ data
 
 datatime-local
 	日期，包括时分秒。
+```
 
++ **label**
+```
 label
 	指定输入项的文字描述信息
 	for属性：
@@ -1322,8 +1334,8 @@ rows
 ```
 
 + 选择器：筛选具有相似特征的元素
-
 + 注意：每一对属性要用分号隔开，最后一对可写可不写。
++ 注释：```/* */```
 
 ### 11.3 选择器
 
@@ -1669,7 +1681,7 @@ eval：将字符串转换为JS脚本代码来执行
 
 URL对中文进行编码，一个百分号是一个字节
 
-### 12. 2 BOM
+### 12.2 BOM
 
 + 概念：Browser Object Model 浏览器对象模型
 + 将浏览器的各个组成部分封装成对象。
@@ -2350,9 +2362,9 @@ JavaEE：Java语言在企业级开发中使用的技术规范的总和，一共�
 ```
 --项目的根目录
 --WEB-INF目录：
-  --web.xml：web项目的核心配置文件
-  --classes目录：放置字节码文件的目录
-  --lib目录：放置依赖的jar包
+    --web.xml：web项目的核心配置文件
+    --classes目录：放置字节码文件的目录
+    --lib目录：放置依赖的jar包
 ```
 
 + Tomcat默认端口：8080

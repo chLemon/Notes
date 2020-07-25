@@ -928,7 +928,7 @@ int intValue();以int类型返回该Integer的值
 2. 包装类的静态方法：```toString(参数)```，注意**该方法要带参数**
 3. String类的静态方法```valueOf(参数)```
 ### 字符串转基本类型
-包装类的静态方法parseXXXString (str)
+包装类的静态方法```parseXXX(String str)```
 # Day02
 ## Collection接口：集合
 ```Collection<E>```

@@ -1,6 +1,6 @@
 # JavaSE
 
-## 1 基础知识与安装
+## 1 基础知识与JDK安装
 
 ### 1.1 计算机基础知识
 
@@ -242,7 +242,7 @@ if...else if...else
 
 + 记得写    default：和        break;
 
-+ switch小括号内**只能**是下列数据类型【2种字符和3种整数，没有long】
++ switch小括号内**只能**是下列数据类型【2种字符和3种整数+枚举，没有long】
   基本数据类型：byte / short / char / int
   引用数据类型：String、enum
 
@@ -286,8 +286,8 @@ do...while
 ### 7.1 数组的定义
 
 ```
-int[] arrayA = new int[300];
-int[] arrayA = new int[] {1,2,3};
+int[] array = new int[300];
+int[] array = new int[] {1,2,3};
 int[] array = {1,2,3};
 ```
 
@@ -554,7 +554,7 @@ public class Person{
 
 **特点：**
 
-+ 当第一次用到该类时，静态代码快执行唯一的一次。
++ 当第一次用到该类时，静态代码块执行唯一的一次。
 + 静态内容总是优先于非静态，静态代码块比构造方法先执行。
 
 **典型用途：**
@@ -1276,9 +1276,7 @@ int intValue();以int类型返回该Integer的值
 
 ### 32.2 字符串转基本类型
 
-包装类的静态方法parseXXXString (str)
-【包装类的构造方法】
-【包装类的valueOf】
+包装类的静态方法```parseXXX(String str)```
 
 ## 33 泛型
 
@@ -1340,7 +1338,7 @@ public void method(Collection<?> coll){//此时就无所谓传进来的到底是
 1. 长度，前者可变，后者不可变
 2. 集合不能存储基本类型，只能存对象
 
-### 34.1 集合框架
+### 34.1 单列集合框架
 
 | Collection接口                   | List接口                             |                                        |
 | -------------------------------- | ------------------------------------ | -------------------------------------- |
@@ -2048,7 +2046,7 @@ public boolean isFile();是文件？如果不存在，false
 ```
 public boolean createNewFile();如不存在，创建一个新的空文件。文件存在返回false。如创建文件的路径不存在会抛出异常。
 public boolean delete();删除文件或目录，如目录中有内容不会删除，路径不存在，均会返回false
-public boolean mkdir();创建目录，如多级文件夹，创建不了返回false
+public boolean mkdir();创建目录，如文件夹，创建不了返回false
 public boolean mkdirs():创建目录，包括任何必须但不存在的父目录
 ```
 
@@ -2263,7 +2261,7 @@ int read(char[] cbuf);一次读取多个字符，读入数组
 void close();关闭流并释放系统资源
 ```
 
-### 53.2 文件字符输入流InputStreamReader
+### 53.2 文件字符输入流FileReader 
 
 ```java.io.FileReader extends InputStreamReader extends Reader```文件字符输入流
 
@@ -2303,7 +2301,7 @@ void flush();
 void close();
 ```
 
-### 53.4 文件字符输出流OutputStreamWriter
+### 53.4 文件字符输出流FileWriter
 
 ```java.io.FileWriter extends OutputStreamWriter extends Writer```文件字符输出流
 
@@ -2750,14 +2748,14 @@ HTTP/1.1 200 OK .....
 
 使用**Lambda**或**方法引用**简化程序
 
-### 62.1 Lambda的延迟执行
+### 61.1 Lambda的延迟执行
 举例：日志案例的性能优化
 如果写成```function(level:1, message拼接)```这样，无论日志等级是几，都会拼接字符串
 但如果写成```funtion(level, interface)```，然后调用的时候用Lambda表达式，那么只有当level为1时，才会调用Lambda表达式里的函数，不是不调用。
 
 + 提升性能
 
-### 62.2 Lambda表达式作为函数的参数和返回值举例
+### 61.2 Lambda表达式作为函数的参数和返回值举例
 
 参数：线程Runnable的run方法
 返回值：Comparator的compare方法
@@ -2771,15 +2769,15 @@ HTTP/1.1 200 OK .....
 使用更方便，但原理不变的代码语法。如foreach和迭代器。
 Lambda从应用层面看上去是匿名内部类的语法糖，但二者原理不同。
 
-### 61.1 注解@FuntionalInterface
+### 62.1 注解@FuntionalInterface
 
 作用：可以检测接口是否是一个函数式接口
 
-### 61.2 使用
+### 62.2 使用
 
 作为函数参数，使用Lambda表达式
 
-### 61.3 Lambda与匿名内部类的区别
+### 62.3 Lambda与匿名内部类的区别
 
 没有class文件，不用加载，提高效率
 
@@ -2962,7 +2960,7 @@ IDEA使用技巧：/** 回车 可以快速生成默认注释
 ### 66.3 断言Assert
 
 ```
-Assert.assertEquals();
+Assert.assertEquals(String message, Object expected, Object actual);
 ```
 
 ### 66.4 两个注解：Before和After

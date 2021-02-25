@@ -241,52 +241,64 @@ alias cdpa="cd ~/Work/parking-on-sale"
 
 ```
 [alias]
-    co = checkout
-    cm = commit
-    br = branch
-    st = status
-    sw = switch
-    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    
-    fix = commit -m "fix"
-    fixconf = commit -m "解决代码冲突"
-    
-    unstage = reset HEAD
-    last = log -1
-    
-    swdev = switch -c dev
-    sw1 = switch -c feature-dev-1
-    sw2 = switch -c feature-dev-2
-    sw3 = switch -c feature-dev-3
-    sw4 = switch -c feature-dev-4
-    sw5 = switch -c feature-dev-5
-    sw6 = switch -c feature-dev-6
-    sw7 = switch -c feature-dev-7
-    sw8 = switch -c feature-dev-8
-    sw9 = switch -c feature-dev-9
-    
-    pulldev = pull origin dev
-    pullmaster = pull origin master
-    pull1 = pull origin feature-dev-1
-    pull2 = pull origin feature-dev-2
-    pull3 = pull origin feature-dev-3
-    pull4 = pull origin feature-dev-4
-    pull5 = pull origin feature-dev-5
-    pull6 = pull origin feature-dev-6
-    pull7 = pull origin feature-dev-7
-    pull8 = pull origin feature-dev-8
-    pull9 = pull origin feature-dev-9
-    
-    pushdev = push origin dev
-    push1 = push origin feature-dev-1
-    push2 = push origin feature-dev-2
-    push3 = push origin feature-dev-3
-    push4 = push origin feature-dev-4
-    push5 = push origin feature-dev-5
-    push6 = push origin feature-dev-6
-    push7 = push origin feature-dev-7
-    push8 = push origin feature-dev-8
-    push9 = push origin feature-dev-9
+	co = checkout
+	cm = commit
+	br = branch
+	st = status
+	sw = switch
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+	fix = commit -m "fix"
+	fixconf = commit -m "解决代码冲突"
+
+	unstage = reset HEAD
+	last = log -1
+
+	swcdev = switch -c dev
+	swc1 = switch -c feature-dev-1
+	swc2 = switch -c feature-dev-2
+	swc3 = switch -c feature-dev-3
+	swc4 = switch -c feature-dev-4
+	swc5 = switch -c feature-dev-5
+	swc6 = switch -c feature-dev-6
+	swc7 = switch -c feature-dev-7
+	swc8 = switch -c feature-dev-8
+	swc9 = switch -c feature-dev-9
+
+	swdev = switch dev
+	sw1 = switch feature-dev-1
+	sw2 = switch feature-dev-2
+	sw3 = switch feature-dev-3
+	sw4 = switch feature-dev-4
+	sw5 = switch feature-dev-5
+	sw6 = switch feature-dev-6
+	sw7 = switch feature-dev-7
+	sw8 = switch feature-dev-8
+	sw9 = switch feature-dev-9
+
+	pulldev = pull origin dev
+	pullm = pull origin master
+	pullmi = pull origin main
+	pull1 = pull origin feature-dev-1
+	pull2 = pull origin feature-dev-2
+	pull3 = pull origin feature-dev-3
+	pull4 = pull origin feature-dev-4
+	pull5 = pull origin feature-dev-5
+	pull6 = pull origin feature-dev-6
+	pull7 = pull origin feature-dev-7
+	pull8 = pull origin feature-dev-8
+	pull9 = pull origin feature-dev-9
+		
+	pushdev = push origin dev
+	push1 = push origin feature-dev-1
+	push2 = push origin feature-dev-2
+	push3 = push origin feature-dev-3
+	push4 = push origin feature-dev-4
+	push5 = push origin feature-dev-5
+	push6 = push origin feature-dev-6
+	push7 = push origin feature-dev-7
+	push8 = push origin feature-dev-8
+	push9 = push origin feature-dev-9
 ```
 
 ## 4.5 GitHub的SSH设置
@@ -304,6 +316,33 @@ ssh-keygen -t rsa -C "youremail@example.com"
 ### b 在GitHub上添加SSH Key
 
 登录GitHub，在Account settings，SSH Keys里，Add SSH Key，title任意，粘贴公钥内容
+
+## 4.6 代理设置
+
+```bash
+# 对全部仓库进行http代理
+git config --global http.proxy http://127.0.0.1:1080
+git config --global https.proxy https://127.0.0.1:1080
+
+# 只对GitHub进行http代理
+git config --global http.https://github.com.proxy https://127.0.0.1:1087
+git config --global https.https://github.com.proxy https://127.0.0.1:1087
+
+# sock5代理
+git config --global http.https://github.com.proxy socks5://127.0.0.1:1086
+git config --global https.https://github.com.proxy socks5://127.0.0.1:1086
+
+# 取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+# 查看已有配置
+git config --global -l
+```
+
+### 4.6.1 镜像
+
+只需要将 [www.github.com](https://link.zhihu.com/?target=http%3A//www.github.com/)/后面为代码库 改为 www.github.com.cnpmjs.org/后面为代码库地址
 
 # 5 常用命令
 

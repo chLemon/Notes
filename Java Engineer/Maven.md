@@ -18,3 +18,11 @@ maven三套生命周期：清理生命周期，默认生命周期，站点生命
 
 搭环境：
 创建webapp，然后web.xml的头换一下，换成3.0【？】
+
+
+
+
+
+brew install maven
+
+mvn -version

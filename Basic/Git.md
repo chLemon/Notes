@@ -443,7 +443,7 @@ git rm <file>
 
 ```
 git reflog
-显示所有commit日志
+显示所有分支的所有操作记录
 查看每一次命令，可以用来找当前版本（reset到这个版本）之后的版本号
 ```
 
@@ -648,6 +648,14 @@ git stash apply stash@{0}
 
 ```
 git cherry-pick <commit_id>
+```
+
+### revert
+
+回滚掉一个提交，即撤销掉这次提交做的改动
+
+```
+git revert <commit_id>
 ```
 
 # 图形化工具：Sourcetree
